@@ -2,10 +2,13 @@ package com.satya.mytictoe.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+/*For Dark Theme*/
 val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF160035)
 val Purple700 = Color(0xFF3700B3)
 val Teal200 = Color(0xFF03DAC5)
+
+/*For Light Theme*/
+val Purple500 = Color(0xFF160035)
 
 val Aqua = Color(0xFF04D4F0)
 val GreenishYellow = Color(0xFFA8C920)

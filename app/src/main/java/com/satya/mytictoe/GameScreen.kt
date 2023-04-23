@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -30,131 +28,141 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.satya.mytictoe.ui.theme.BlueCustom
-import com.satya.mytictoe.ui.theme.GrayBackground
 import com.satya.mytictoe.viewModel.GameViewModel
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun GameScreen(viewModel: GameViewModel) {
     val state = viewModel.state
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(GrayBackground)
-            .padding(horizontal = 10.dp),
-        horizontalAlignment = CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
-    ) {
-        Text(
-            text = "Tic Tac Toe", fontSize = 50.sp,
-            fontFamily = FontFamily.Cursive,
-            fontWeight = FontWeight.Bold,
-            color = BlueCustom
-        )
-        Row(
+    Surface {
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-
+                .fillMaxSize()
+                .background(MaterialTheme.colors.background)
+                .padding(horizontal = 10.dp),
+            horizontalAlignment = CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(text = "Player 'O' : ${state.playerCircleCount}", fontSize = 16.sp)
-            Text(text = "Draw : ${state.drawCount}", fontSize = 16.sp)
-            Text(text = "Player 'X' : ${state.playerCrossCount}", fontSize = 16.sp)
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .shadow(elevation = 10.dp, shape = RoundedCornerShape(20.dp))
-                .clip(RoundedCornerShape(20.dp))
-                .background(GrayBackground),
-            contentAlignment = Alignment.Center
-        ) {
-            BoardBase()
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+            Text(
+                text = "Tic Tac Toe", fontSize = 50.sp,
+                fontFamily = FontFamily.Cursive,
+                fontWeight = FontWeight.Bold,
+                color = BlueCustom
+            )
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .aspectRatio(1f)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                viewModel.boardItems.forEach { (cellNo, boardCellValue) ->
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(1f)
-                                .clickable(
-                                    interactionSource = MutableInteractionSource(),
-                                    indication = null
-                                ) {
-                                    viewModel.onAction(
-                                        UserAction.BoardTapped(cellNo)
-                                    )
-                                },
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = CenterHorizontally
-                        ) {
-                            AnimatedVisibility(
-                                visible = viewModel.boardItems[cellNo] != BoardCellValue.NONE,
-                                enter = scaleIn(tween(50))
+                Text(
+                    text = "Player 'O' : ${state.playerCircleCount}",
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "Draw : ${state.drawCount}",
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "Player 'X' : ${state.playerCrossCount}",
+                    fontSize = 16.sp
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .shadow(elevation = 10.dp, shape = RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colors.background),
+                contentAlignment = Alignment.Center
+            ) {
+                BoardBase()
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .aspectRatio(1f)
+                ) {
+                    viewModel.boardItems.forEach { (cellNo, boardCellValue) ->
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(1f)
+                                    .clickable(
+                                        interactionSource = MutableInteractionSource(),
+                                        indication = null
+                                    ) {
+                                        viewModel.onAction(
+                                            UserAction.BoardTapped(cellNo)
+                                        )
+                                    },
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = CenterHorizontally
                             ) {
-                                if (boardCellValue == BoardCellValue.CIRCLE) {
-                                    Circle()
-                                } else if (boardCellValue == BoardCellValue.CROSS) {
-                                    Cross()
+                                AnimatedVisibility(
+                                    visible = viewModel.boardItems[cellNo] != BoardCellValue.NONE,
+                                    enter = scaleIn(tween(50))
+                                ) {
+                                    if (boardCellValue == BoardCellValue.CIRCLE) {
+                                        Circle()
+                                    } else if (boardCellValue == BoardCellValue.CROSS) {
+                                        Cross()
+                                    }
                                 }
-                            }
 
+                            }
                         }
+                    }
+
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f),
+                    horizontalAlignment = CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    AnimatedVisibility(
+                        visible = state.hasWon,
+                        enter = fadeIn(tween(1000))
+                    ) {
+                        DrawWinnerLine(state = state)
                     }
                 }
 
             }
-            Column(
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f),
-                horizontalAlignment = CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+
             ) {
-                AnimatedVisibility(
-                    visible = state.hasWon,
-                    enter = fadeIn(tween(1000))
+                Text(
+                    text = state.hintText,
+                    fontSize = 24.sp
+                )
+                Button(
+                    onClick = {
+                        viewModel.onAction(UserAction.PlayAgainButtonClick)
+                    },
+                    shape = RoundedCornerShape(5.dp),
+                    elevation = ButtonDefaults.elevation(5.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = BlueCustom,
+                        contentColor = Color.White
+                    )
                 ) {
-                    DrawWinnerLine(state = state)
+                    Text(
+                        text = "Play Again",
+                        fontSize = 16.sp
+                    )
                 }
             }
 
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-
-        ) {
-            Text(
-                text = state.hintText,
-                fontSize = 24.sp
-            )
-            Button(
-                onClick = {
-                    viewModel.onAction(UserAction.PlayAgainButtonClick)
-                },
-                shape = RoundedCornerShape(5.dp),
-                elevation = ButtonDefaults.elevation(5.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = BlueCustom,
-                    contentColor = Color.White
-                )
-            ) {
-                Text(
-                    text = "Play Again",
-                    fontSize = 16.sp
-                )
-            }
-        }
-
     }
 
 }
